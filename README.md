@@ -8,12 +8,22 @@ xApp development environment using Near-RT FlexRIC from the Mosaic5G project
 
 ## Get Starting
 
-### Building emulated CU and DU Images
+### Get Repository
 Clone the flexric-dev repository.
 
 ```shell
 git clone https://github.com/muriloAvlis/flexric-dev
 ```
+
+### Building RIC
+
+To build the Near-RT RIC Docker image, run to following command:
+
+```sh
+make build-ric FLEXRIC_VERSION={flexric-branch}
+```
+
+### Building emulated CU and DU Images
 
 To build the CU and DU Docker images, run to following command:
 

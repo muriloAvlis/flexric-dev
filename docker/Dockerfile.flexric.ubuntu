@@ -33,6 +33,7 @@ ARG E2AP_VERSION=E2AP_V3
 ARG KPM_VERSION=KPM_V3_00
 # Disable xApps build
 ARG XAPP_MULTILANGUAGE=OFF
+ARG XAPP_DB=NONE_XAPP
 
 #---------------------------------------------------------------------
 # DEPENDENCIES BUILDER STAGE
@@ -63,6 +64,9 @@ RUN apt-get update && \
     libpcre2-dev \
     python3-dev \
     python3-pip \
+    pkg-config \
+    libconfig-dev \
+    libconfig++-dev \
     gcc-13 \
     g++-13 \
     mold \
@@ -89,6 +93,7 @@ ARG FLEXRIC_VERSION
 ARG E2AP_VERSION
 ARG KPM_VERSION
 ARG XAPP_MULTILANGUAGE
+ARG XAPP_DB
 
 WORKDIR /
 
@@ -104,7 +109,8 @@ RUN cd flexric && \
     -DCMAKE_CXX_COMPILER=g++-13 \
     -DE2AP_VERSION=${E2AP_VERSION} \
     -DKPM_VERSION=${KPM_VERSION} \
-    -DXAPP_MULTILANGUAGE=${XAPP_MULTILANGUAGE} .. && \
+    -DXAPP_MULTILANGUAGE=${XAPP_MULTILANGUAGE} \
+    -DXAPP_DB=${XAPP_DB} .. && \
     ninja && \
     ninja install && \
     echo "--- Check shared objects dependencies for executable nearRT-RIC ---" && \
@@ -124,6 +130,13 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --yes \
     psmisc \
     gpg \
+    libsctp-dev \
+    python3 \
+    cmake-curses-gui \
+    python3-dev \
+    pkg-config \
+    libconfig-dev \
+    libconfig++-dev \
     wget \
     libsctp1 \
     python3 \
@@ -133,22 +146,20 @@ RUN apt-get update && \
     apt-get autoremove -y && \
     apt-get autoclean -y
 
+ARG FLEXRIC_VERSION
+
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Belem
+ENV FLEXRIC_VERSION=${FLEXRIC_VERSION}
 
 WORKDIR /
 
+## Service Models libs
 COPY --from=oai-flexric-builder \
-    /usr/local/lib/flexric/libmac_sm.so \
-    /usr/local/lib/flexric/libkpm_sm.so \
-    /usr/local/lib/flexric/librlc_sm.so \
-    /usr/local/lib/flexric/libslice_sm.so \
-    /usr/local/lib/flexric/libtc_sm.so \
-    /usr/local/lib/flexric/libgtp_sm.so \
-    /usr/local/lib/flexric/libpdcp_sm.so \
-    /usr/local/lib/flexric/librc_sm.so \
+    /usr/local/lib/flexric/lib* \
     /usr/local/lib/flexric/
 
+## xApp libs
 COPY --from=oai-flexric-builder \
     /flexric/build/src/xApp/libe42_xapp_shared.so \
     /flexric/build/src/xApp/
@@ -157,7 +168,15 @@ COPY --from=oai-flexric-builder \
     /flexric/build/examples/ric/nearRT-RIC /usr/local/bin/nearRT-RIC
 
 ## Copy Config file
-COPY --from=oai-flexric-builder /flexric/flexric.conf /usr/local/etc/flexric/flexric.conf
+COPY --from=oai-flexric-builder /flexric /tmp/flexric
+# Escolhe o correto dependendo da versão
+RUN mkdir -p /usr/local/etc/flexric && \
+    if [ "$FLEXRIC_VERSION" = "br-flexric" ]; then \
+      cp /tmp/flexric/conf_files/ric.conf /usr/local/etc/flexric/ric.conf; \
+    else \
+      cp /tmp/flexric/flexric.conf /usr/local/etc/flexric/ric.conf; \
+    fi && \
+    rm -rf /tmp/flexric
 
 RUN ldconfig && \
     echo "--- Check shared objects dependencies for executable nearRT-RIC ---" && \

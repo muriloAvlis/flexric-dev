@@ -14,7 +14,7 @@ if [[ -n ${BIND_INTERFACE} ]]; then
 
     if [[ ${RIC_IP} =~ ${ip_check} ]]; then
         echo "[INFO]: Replacing Near-RT RIC IP with ${RIC_IP} in config file";
-        sed -i "s/NEAR_RIC_IP = 127.0.0.1/NEAR_RIC_IP = ${RIC_IP}/g" /usr/local/etc/flexric/flexric.conf;
+        sed -i "s/127.0.0.1/${RIC_IP}/g" /usr/local/etc/flexric/ric.conf;
     else 
         echo "[Error]: Invalid IP address obtained from ${BIND_INTERFACE}";
         exit 1;

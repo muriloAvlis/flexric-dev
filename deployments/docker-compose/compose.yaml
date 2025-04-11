@@ -2,7 +2,7 @@ services:
   ric:
     image: muriloavlis/flexric:dev
     build:
-      context: ../docker
+      context: ../../docker
       dockerfile: Dockerfile.flexric.ubuntu
     networks:
       - flexric-net
@@ -18,7 +18,7 @@ services:
   gnb-cu:
     image: muriloavlis/flexric-gnb-cu:dev
     build: 
-      context: ../docker
+      context: ../../docker
       dockerfile: Dockerfile.gnb-cu.ubuntu
       args:
         - NEAR_RIC_IP=192.168.122.20
@@ -37,7 +37,7 @@ services:
   gnb-du:
     image: muriloavlis/flexric-gnb-du:dev
     build: 
-      context: ../docker
+      context: ../../docker
       dockerfile: Dockerfile.gnb-du.ubuntu
       args:
         - NEAR_RIC_IP=192.168.122.20
