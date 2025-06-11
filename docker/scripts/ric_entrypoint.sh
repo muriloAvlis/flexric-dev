@@ -22,4 +22,4 @@ if [[ -n ${BIND_INTERFACE} ]]; then
 fi
 
 ## Run near-RT RIC
-stdbuf -o0 nearRT-RIC
+stdbuf -o0 nearRT-RIC -c /usr/local/etc/flexric/ric.conf
